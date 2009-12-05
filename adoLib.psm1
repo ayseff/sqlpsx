@@ -1,3 +1,17 @@
+# ---------------------------------------------------------------------------
+### <Script>
+### <Author>
+### Mike Shepard
+### </Author>
+### <Description>
+### Defines functions for executing Ado.net queries
+### </Description>
+### <Usage>
+### import-module adolib
+###  </Usage>
+### </Script>
+# ---------------------------------------------------------------------------
+
 <#
 	.SYNOPSIS
 		Create a SQLConnection object with the given parameters
@@ -23,13 +37,19 @@
 	.EXAMPLE
 		PS C:\> Get-Something -server MYSERVER -user sa -password sapassword
 
+    .INPUTS
+        None.
+        You cannot pipe objects to New-connection
 
 	.OUTPUTS
 		System.Data.SqlClient.SQLConnection
 
 #>
 function new-connection{
-param([string]$server, [string]$database='',[string]$user='',[string]$password='')
+param([Parameter(Position=0, Mandatory=$true)][string]$server, 
+      [Parameter(Position=1, Mandatory=$false)][string]$database='',
+      [string]$user='',
+      [string]$password='')
 
 	if($database -ne ''){
 	  $dbclause="Database=$database;"
@@ -47,8 +67,11 @@ param([string]$server, [string]$database='',[string]$user='',[string]$password='
 }
 
 function get-connection{
-param([System.Data.SqlClient.SQLConnection]$conn,[string]$server, [string]$database,[string]$user,[string]$password)
-    write-debug "gcn: $conn"
+param([System.Data.SqlClient.SQLConnection]$conn,
+      [string]$server, 
+      [string]$database,
+      [string]$user,
+      [string]$password)
 	if (-not $conn){
 		if ($server){
 			$conn=new-connection -server $server -database $database -user $user -password $password 
@@ -60,25 +83,54 @@ param([System.Data.SqlClient.SQLConnection]$conn,[string]$server, [string]$datab
 }
 
 function put-outputparameters{
-param([System.Data.SqlClient.SQLCommand]$cmd, [hashtable]$outparams)
-	foreach($outp in $outparams.Keys){
-        $paramtype=get-paramtype $outparams[$outp]
-        $p=$cmd.Parameters.Add("@$outp",$paramtype)
-		$p.Direction=[System.Data.ParameterDirection]::Output
-        if ($paramtype -like 'varchar*'){
-           $p.Size=[int]$v.Substring(8,$v.Length-9)
-        }
-	}
+param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd, 
+      [Parameter(Position=1, Mandatory=$false)][hashtable]$outparams)
+    if ($outparams){
+    	foreach($outp in $outparams.Keys){
+            $paramtype=get-paramtype $outparams[$outp]
+            $p=$cmd.Parameters.Add("@$outp",$paramtype)
+    		$p.Direction=[System.Data.ParameterDirection]::Output
+            if ($paramtype -like '*char*'){
+               $p.Size=[int]$outparams[$outp].Replace($paramtype.ToString().ToLower(),'').Replace('(','').Replace(')','')
+            }
+    	}
+    }
 }
 
 function get-outputparameters{
-param([System.Data.SqlClient.SQLCommand]$cmd,[hashtable]$outparams)
+param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd,
+      [Parameter(Position=1, Mandatory=$true)][hashtable]$outparams)
 	foreach($p in $cmd.Parameters){
 		if ($p.Direction -eq [System.Data.ParameterDirection]::Output){
 		  $outparams[$p.ParameterName.Replace("@","")]=$p.Value
 		}
 	}
 }
+
+
+
+function get-paramtype{
+param([string]$typename)
+	$type=switch -wildcard ($typename.ToLower()) {
+		'uniqueidentifier' {[System.Data.SqlDbType]::UniqueIdentifier}
+		'int'  {[System.Data.SQLDbType]::Int}
+		'datetime'  {[System.Data.SQLDbType]::Datetime}
+		'tinyint'  {[System.Data.SQLDbType]::tinyInt}
+		'smallint'  {[System.Data.SQLDbType]::smallInt}
+		'bigint'  {[System.Data.SQLDbType]::BigInt}
+		'bit'  {[System.Data.SQLDbType]::Bit}
+		'char*'  {[System.Data.SQLDbType]::char}
+		'nchar*'  {[System.Data.SQLDbType]::nchar}
+		'date'  {[System.Data.SQLDbType]::date}
+		'datetime'  {[System.Data.SQLDbType]::datetime}
+        'varchar*' {[System.Data.SqlDbType]::Varchar}
+        'nvarchar*' {[System.Data.SqlDbType]::nVarchar}
+		default {[System.Data.SqlDbType]::Int}
+	}
+	return $type
+	
+}
+
 
 <#
 Helper function figure out what kind of returned object to build from the results of a sql call (ds). 
@@ -92,8 +144,9 @@ Options are:
 	
 
 #>
-function HandleReturn{
-param([System.Data.Dataset]$ds, [HashTable]$outparams)   
+function get-commandresults{
+param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds, 
+      [Parameter(Position=1, Mandatory=$true)][HashTable]$outparams)   
 
 	if ($ds.tables.count -eq 1){
 		$retval= $ds.Tables[0]
@@ -157,12 +210,24 @@ param([System.Data.Dataset]$ds, [HashTable]$outparams)
 		PS C:\> $con=new-connection MyServer
         PS C:\> invoke-sql "Update Table1 set Col1=null where TableID=@ID" -parameters @{ID=5}
 
+    .INPUTS
+        None.
+        You cannot pipe objects to invoke-sql
+
 	.OUTPUTS
 		Integer
 
 #>
 function invoke-sql{
-param([string]$sql,[System.Data.SqlClient.SQLConnection]$connection,[hashtable]$parameters=@{},[int]$timeout=30,[string]$server,[string]$database='',[string]$user,[string]$password,[System.Data.SqlClient.SqlTransaction]$transaction=$nothing)
+param([Parameter(Position=0, Mandatory=$true)][string]$sql,
+      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
+      [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
+      [Parameter(Position=3, Mandatory=$false)][int]$timeout=30,
+      [Parameter(Position=4, Mandatory=$false)][string]$server,
+      [Parameter(Position=5, Mandatory=$false)][string]$database,
+      [Parameter(Position=6, Mandatory=$false)][string]$user,
+      [Parameter(Position=7, Mandatory=$false)][string]$password,
+      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing)
 	
 	$conn=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 	
@@ -230,15 +295,27 @@ param([string]$sql,[System.Data.SqlClient.SQLConnection]$connection,[hashtable]$
         This is an example of a query that returns a single result and uses a parameter.  It also generates its own (ad hoc) connection.
         PS C:\> invoke-query 'select * from master.dbo.sysdatabases where name=@dbname' -param  @{dbname='master'} -server '.\sqlexpress' -database 'master'
 
+     .INPUTS
+        None.
+        You cannot pipe objects to invoke-query
 
-    .OUTPUTS
+   .OUTPUTS
         Several possibilities (depending on the structure of the query and the presence of output variables)
         1.  A list of rows 
         2.  A dataset (for multi-result set queries)
         3.  An object that contains a dictionary of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
 function invoke-query{
-param( [string]$sql,[System.Data.SqlClient.SqlConnection]$connection,[hashtable]$parameters=@{},[hashtable]$outparameters=@{},[int]$timeout=30,$server,[string] $database='',[string]$user,[string]$password,[System.Data.SqlClient.SqlTransaction]$transaction)
+param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
+       [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
+       [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
+       [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
+       [Parameter(Position=5, Mandatory=$false)][string]$server,
+       [Parameter(Position=6, Mandatory=$false)][string]$database,
+       [Parameter(Position=7, Mandatory=$false)][string]$user,
+       [Parameter(Position=8, Mandatory=$false)][string]$password,
+       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction)
 
 	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 		
@@ -263,7 +340,7 @@ param( [string]$sql,[System.Data.SqlClient.SqlConnection]$connection,[hashtable]
     
 	get-outputparameters $cmd $outparameters
 
-	return HandleReturn $ds $outparameters
+	return (get-commandresults $ds $outparameters)
 }
 <#
 	.SYNOPSIS
@@ -284,6 +361,7 @@ param( [string]$sql,[System.Data.SqlClient.SqlConnection]$connection,[hashtable]
 
 	.PARAMETER  outparameters
 		A hashtable of input parameters to be supplied with the query.  Entries in the hashtable should have names that match the parameter names, and string values that are the type of the parameters. 
+        Note:  not all types are accounted for by the code. int, uniqueidentifier, varchar(n), and char(n) should all work, though.
         
 	.PARAMETER  timeout
 		The commandtimeout value (in seconds).  The command will fail and be rolled back if it does not complete before the timeout occurs.
@@ -310,7 +388,7 @@ param( [string]$sql,[System.Data.SqlClient.SqlConnection]$connection,[hashtable]
         #Calling a stored procedure that has an output parameter and multiple result sets
         PS C:\> $c=new-connection '.\sqlexpress'
         PS C:\> $res=invoke-storedprocedure -storedProcName 'AdventureWorks2008.dbo.stp_test' -outparameters @{LogID='int'} -conne $c
-        PS C:\> $res.Output.Tables[1]
+        PS C:\> $res.Results.Tables[1]
         PS C:\> $res.OutputParameters
         
         For reference, here's the stored procedure:
@@ -323,15 +401,28 @@ param( [string]$sql,[System.Data.SqlClient.SqlConnection]$connection,[hashtable]
     .EXAMPLE 
         #Calling a stored procedure that has an input parameter
         PS C:\> invoke-storedprocedure 'sp_who2' -conn $c -parameters @{loginame='sa'}
+    .INPUTS
+        None.
+        You cannot pipe objects to invoke-storedprocedure
+
     .OUTPUTS
         Several possibilities (depending on the structure of the query and the presence of output variables)
         1.  A list of rows 
         2.  A dataset (for multi-result set queries)
-        3.  An object that contains a dictionary of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
+        3.  An object that contains a hashtables of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
 function invoke-storedprocedure{
-param([string]$storedProcName,[System.Data.SqlClient.SqlConnection]$connection,  [hashtable] $parameters=@{},$outparameters=@{},[string]$server,[string]$database='',[string]$user,[string]$password,[System.Data.SqlClient.SqlTransaction]$transaction=$nothing,[int]$timeout=30) 
-	write-debug "ist: $connection"
+param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
+      [Parameter(Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
+      [Parameter(Position=2, Mandatory=$false)][hashtable] $parameters=@{},
+      [Parameter(Position=3, Mandatory=$false)][hashtable]$outparameters=@{},
+      [Parameter(Position=4, Mandatory=$false)][int]$timeout=30,
+      [Parameter(Position=5, Mandatory=$false)][string]$server,
+      [Parameter(Position=6, Mandatory=$false)][string]$database,
+      [Parameter(Position=7, Mandatory=$false)][string]$user,
+      [Parameter(Position=8, Mandatory=$false)][string]$password,
+      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing) 
+
 	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 
 	$cmd=new-object system.Data.SqlClient.SqlCommand($sql,$connection)
@@ -352,31 +443,11 @@ param([string]$storedProcName,[System.Data.SqlClient.SqlConnection]$connection, 
 	
 	get-outputparameters $cmd $outparameters
 		
-	return HandleReturn $ds $outparameters
+	return (get-commandresults $ds $outparameters)
 }
 
 
-
-function get-paramtype{
-param([string]$typname)
-	$type=switch ($typename) {
-		'uniqueidentifier' {[System.Data.SqlDbType]::UniqueIdentifier}
-		'int'  {[System.Data.SQLDbType]::Int}
-        'varchar*' {[System.Data.SqlDbType]::Varchar}
-		default {[System.Data.SqlDbType]::Int}
-	}
-	return $type
-	
-}
-
-
-
-#export-modulemember get-connection
 export-modulemember new-connection
 export-modulemember invoke-sql
 export-modulemember invoke-query
 export-modulemember invoke-storedprocedure
-#export-modulemember put-outputparameters
-#export-modulemember get-outputparameters
-#export-modulemember HandleReturn
-#export-modulemember get-paramtype
