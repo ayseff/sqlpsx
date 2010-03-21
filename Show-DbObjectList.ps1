@@ -7,6 +7,10 @@ New-Window {
         	  <TreeViewItem Header="{Binding Column}" />
         	</DataTemplate>  
             <DataTemplate 
+        		x:Key = "ParameterTemplate">
+        	  <TreeViewItem Header="{Binding Parameter}" />
+        	</DataTemplate>
+            <DataTemplate 
         		x:Key = "KeysTemplate">
         	  <TreeViewItem Header="{Binding COLUMN_NAME}" />
         	</DataTemplate>        	
@@ -34,13 +38,40 @@ New-Window {
                         ItemsSource="{Binding Table2Operations}" 
                         ItemTemplate="{StaticResource OperationsTemplate}" />
                 </TreeViewItem>             
+        	</DataTemplate>
+            <DataTemplate 
+        		x:Key = "ViewTemplate" >
+        		<TreeViewItem Header="{Binding Table}" >
+                    <TreeViewItem Header="Columns"
+                        ItemsSource="{Binding View2Column}" 
+                        ItemTemplate="{StaticResource ColumnTemplate}" />
+                </TreeViewItem>             
         	</DataTemplate>        	
-        	<HierarchicalDataTemplate 
-        		x:Key = "DatabaseTemplate"
-        		ItemsSource="{Binding Database2Table}" 
-        		ItemTemplate="{StaticResource TableTemplate}" >
-        		<TreeViewItem Header="{Binding Database}" />  
-        	 </HierarchicalDataTemplate>
+        	<DataTemplate 
+        		x:Key = "RoutineTemplate" >
+        		<TreeViewItem Header="{Binding Routine}" >
+                    <TreeViewItem Header="Parameters"
+                        ItemsSource="{Binding Routine2Parameter}" 
+                        ItemTemplate="{StaticResource ParameterTemplate}" />
+                </TreeViewItem>             
+        	</DataTemplate>
+            <DataTemplate 
+        		x:Key = "DatabaseTemplate">
+        		<TreeViewItem Header="{Binding Database}">
+                    <TreeViewItem 
+                        Header = "Tables"
+                        ItemsSource="{Binding Database2Table}" 
+        		        ItemTemplate="{StaticResource TableTemplate}" />
+                    <TreeViewItem 
+                        Header = "Views"
+                        ItemsSource="{Binding Database2View}" 
+        		        ItemTemplate="{StaticResource ViewTemplate}" />
+                    <TreeViewItem 
+                        Header = "Routines"
+                        ItemsSource="{Binding Database2Routine}" 
+        		        ItemTemplate="{StaticResource RoutineTemplate}" />   
+                </TreeViewItem> 
+        	 </DataTemplate>
     </ScrollViewer.Resources>
     <TreeView 
     	ItemsSource="{Binding Database}"
