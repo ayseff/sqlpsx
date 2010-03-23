@@ -1,4 +1,6 @@
-New-Window {
+function Show-DbObjectList($ds)
+{
+    New-Window {
 @'
 <ScrollViewer>
     <ScrollViewer.Resources>
@@ -73,10 +75,18 @@ New-Window {
                 </TreeViewItem> 
         	 </DataTemplate>
     </ScrollViewer.Resources>
-    <TreeView 
-    	ItemsSource="{Binding Database}"
-    	ItemTemplate="{StaticResource DatabaseTemplate}" >
-    </TreeView>
+    <StackPanel>
+        <Label Content = "Font Size" FontSize="14" />
+        <Slider Name="fontSizeSlider" Minimum="10" Value="18" Maximum="30" Margin="5"/>
+        <TreeView 
+            FontSize="{Binding ElementName=fontSizeSlider, Path=Value}"
+        	ItemsSource="{Binding Database}"
+        	ItemTemplate="{StaticResource DatabaseTemplate}" >
+        </TreeView>
+    </StackPanel>
 </ScrollViewer>
+
+
 '@
-} -DataContext $ds -Height 300 -Width 300 -WindowStartupLocation CenterScreen  -show
+    } -DataContext $ds -Height 300 -Width 300 -WindowStartupLocation CenterScreen -asjob
+}
