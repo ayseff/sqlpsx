@@ -88,5 +88,5 @@ function Show-DbObjectList($ds)
 
 
 '@
-    } -DataContext $ds -Height 300 -Width 300 -WindowStartupLocation CenterScreen -asjob
+    } -DataContext $ds -Height 600 -Width 300 -WindowStartupLocation CenterScreen -asjob
 }
