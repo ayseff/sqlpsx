@@ -72,4 +72,7 @@ Changes log - 0.1a - 03/18/2010, 17:58 - Max Trinidad
 Changes log - 0.2 - 03/24/2010, 0922 - Max Trinidad
 1. I PSscript - "SQLPSX_LoadModules.ps1", added new modules to be loaded: adolib,SQLmaint, & SQLIse.
 
+Changes log – 0.3 – 03/31/2010, 2143 – Max Trinidad
+1.Change the module location to match for User and Windows Profile.
+2.Update Installer instructions word document.
 
