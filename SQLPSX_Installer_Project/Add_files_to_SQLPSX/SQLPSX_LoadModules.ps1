@@ -8,9 +8,9 @@
 # #-03/24/2010 - added new modules: adolib,SQLmaint, & SQLIse.
 # ==============================================================================================
 
-$DestinationLocation = "C:\Windows\System32\WindowsPowerShell\v1.0\Modules\SQLPSX";
+$DestinationLocation = "C:\Windows\System32\WindowsPowerShell\v1.0\Modules\SQLPSX\Modules";
 $env:PSModulePath = $env:PSModulePath + ";" + $DestinationLocation;
-$PSXloadModules = "SQLServer","Agent","Repl","SSIS","SQLParser","Showmbrs","SQLIse","SQLmaint","adolib";
+$PSXloadModules = "SQLServer","Agent","Repl","SSIS","SQLParser","Showmbrs","SQLIse","SQLmaint","adolib","WPK","ISECreamBasic","OracleClient","OracleIse";
 foreach($PSXmodule in $PSXloadModules){
   Write-Host "Loading SQLPSX Module - $PSXModule";
   Import-Module $PSXmodule;
