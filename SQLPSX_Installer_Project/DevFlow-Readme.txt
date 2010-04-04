@@ -76,3 +76,10 @@ Changes log – 0.3 – 03/31/2010, 2143 – Max Trinidad
 1.Change the module location to match for User and Windows Profile.
 2.Update Installer instructions word document.
 
+Change log - 0.4 - 04/04/2010, 10:04 - Max Trinidad
+1.Changes to accomodate modules folders structure.
+2.Change to the "SQLPSX_LoadModules.ps1" to properly look for the PSModule path.
+3.Rename the "Simple SQLPSX Installer steps.docx" to "Readme SQLPSX Installer.docx".
+
+
+
