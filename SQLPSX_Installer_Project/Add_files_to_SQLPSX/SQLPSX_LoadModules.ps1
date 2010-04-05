@@ -10,8 +10,8 @@
 # ==============================================================================================
 
 # Building Module destination path and adding it to the PowerShell PSModulePath variable
-$mpath = $env:PSModulePath.Split(";") ; $DestinationLocation = $mpath[0] + "\SQLPSX\Modules";
-$env:PSModulePath = $env:PSModulePath+ $DestinationLocation + ";" ;
+$mpath = $env:PSModulePath.Split(";") ; $DestinationLocation = ";" + $mpath[0] + "\SQLPSX\Modules;";
+$env:PSModulePath = $env:PSModulePath + $DestinationLocation;
 
 # Here's the SQLPSX modules to be loaded: (feel free to manually customized to your need)
 $PSXloadModules = "SQLServer","Agent","Repl","SSIS","SQLParser","Showmbrs","SQLIse","SQLmaint","adolib","WPK","ISECreamBasic","OracleClient","OracleIse";
