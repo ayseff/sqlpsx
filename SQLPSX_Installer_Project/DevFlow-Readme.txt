@@ -81,5 +81,11 @@ Change log - 0.4 - 04/04/2010, 10:04 - Max Trinidad
 2.Change to the "SQLPSX_LoadModules.ps1" to properly look for the PSModule path.
 3.Rename the "Simple SQLPSX Installer steps.docx" to "Readme SQLPSX Installer.docx".
 
+Change log - 0.5 - 04/05/2010, 21:45 - Max Trinidad/Bernd
+1. Add changes to ps script modules path in the "SQLPSX_LoadModules.ps1"
+2. Also, incorporate suggested changes by Bernd to automate the commented line to execute "SQLPSX_LoadModules.ps1"
+   for either Windows and User profile.
+
+
 
 
