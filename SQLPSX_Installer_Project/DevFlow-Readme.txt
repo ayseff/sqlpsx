@@ -99,6 +99,10 @@ Change log - 0.8 - 05/11/2010 - Max Trinidad
 2. Included the new SQLPSX.2.2.1.zip file containing the new folder structure.
 3. Recompile and test installer.
 
+Change log - 0.9 - 05/15/2010 - Max Trinidad
+1. Add missing variable to properly construct the PSModulePath map to modules folders. 
 
+Change log - 10.0 - 05/15/2010 - Max Trinidad
+1. Add logic to load the appropiate ISE modules and Oracle modules too.
 
 
