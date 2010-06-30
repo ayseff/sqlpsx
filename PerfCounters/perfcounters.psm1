@@ -48,7 +48,7 @@ function Invoke-Sqlcmd2
 
 function Get-ProcessPerfcounter
 {
-	param ( $now, $DateTimeStart,$DateTimeEnd,$total,$Interval,$PathOutputFile,$PathConfigFile,$Machine_Name,$xmldata,$ServerName,$DatabaseName,$UserName,$Password,$CommandInsert)
+	param ( $DateTimeStart,$DateTimeEnd,$total,$Interval,$PathOutputFile,$PathConfigFile,$Machine_Name,$xmldata,$ServerName,$DatabaseName,$UserName,$Password,$CommandInsert)
 	
 
 	$Total = $xmldata.SelectNodes("ConfigP/Counter").Count
@@ -73,6 +73,8 @@ function Get-ProcessPerfcounter
 	$Header | Out-File $PathOutputFile -Encoding "ASCII"
 	
 	$CommandInsertSQL = $CommandInsert
+	
+	$now = Get-Date
 
 	while($now -ge $DateTimeStart -AND $now -le $DateTimeEnd)
 	{
@@ -82,7 +84,7 @@ function Get-ProcessPerfcounter
 		
 					$Values += "$($PerfCounters[$_].nextvalue()),"
 
-	}	
+		}	
 		sleep $Interval
 		$ValuesToFile = ($Values.substring(0,$Values.length -1)) -replace "'",""
 		$ValuesToFile |  out-file $PathOutputFile -Append -Encoding "ASCII"
@@ -94,6 +96,8 @@ function Get-ProcessPerfcounter
 				continue
 			}
 		}
+		
+		$now = Get-Date
 	}	
 						 
 }		
@@ -649,11 +653,11 @@ Function Set-CollectPerfCounter {
 					}
 				
 					if ( $RunAsJob)	{
-							Start-Job -Name $namejob -InitializationScript  {Import-Module PerfCounters -Force} -scriptblock { Get-ProcessPerfcounter $args[0] $args[1] $args[2] $args[3] $args[4] $args[5] $args[6] $args[7] $args[8] $args[9] $args[10] $args[11] $args[13] $args[13] } -ArgumentList $now,$DateTimeStart, $DateTimeEnd ,$total ,$Interval ,$NewPathOutputFile ,$PathConfigFile,$Machine_Name.Machine_Name,$xmldata, $ServerName ,$DatabaseName,$UserName,$Password,$CommandInsert | Format-list id,name,state
+							Start-Job -Name $namejob -InitializationScript  {Import-Module PerfCounters -Force} -scriptblock { Get-ProcessPerfcounter $args[0] $args[1] $args[2] $args[3] $args[4] $args[5] $args[6] $args[7] $args[8] $args[9] $args[10] $args[11] $args[12]  } -ArgumentList $DateTimeStart, $DateTimeEnd ,$total ,$Interval ,$NewPathOutputFile ,$PathConfigFile,$Machine_Name.Machine_Name,$xmldata, $ServerName ,$DatabaseName,$UserName,$Password,$CommandInsert | Format-list id,name,state
 			
 					}	else		{ 
 							Write-Host "Starts gathering..."
-							Get-ProcessPerfcounter  $now $DateTimeStart  $DateTimeEnd  $total  $Interval  $NewPathOutputFile $PathConfigFile $Machine_Name.Machine_Name $xmldata $ServerName $DatabaseName $UserName $Password $CommandInsert
+							Get-ProcessPerfcounter  $DateTimeStart  $DateTimeEnd  $total  $Interval  $NewPathOutputFile $PathConfigFile $Machine_Name.Machine_Name $xmldata $ServerName $DatabaseName $UserName $Password $CommandInsert
 							Write-Host "End gathering..."
 					}
 						
