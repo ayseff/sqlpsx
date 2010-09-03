@@ -227,9 +227,9 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
       [Parameter(Position=5, Mandatory=$false)][string]$database,
       [Parameter(Position=6, Mandatory=$false)][string]$user,
       [Parameter(Position=7, Mandatory=$false)][string]$password,
-      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing)
+      [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 	
-	$conn=get-connection -conn $connection -server $server -database $database -user $user -password $password 
+	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 	
 	
 	$cmd=new-object system.Data.SqlClient.SqlCommand($sql,$connection)
@@ -315,7 +315,7 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
        [Parameter(Position=6, Mandatory=$false)][string]$database,
        [Parameter(Position=7, Mandatory=$false)][string]$user,
        [Parameter(Position=8, Mandatory=$false)][string]$password,
-       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction)
+       [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null)
 
 	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 		
@@ -421,7 +421,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
       [Parameter(Position=6, Mandatory=$false)][string]$database,
       [Parameter(Position=7, Mandatory=$false)][string]$user,
       [Parameter(Position=8, Mandatory=$false)][string]$password,
-      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$nothing) 
+      [Parameter(Position=9, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null) 
 
 	$connection=get-connection -conn $connection -server $server -database $database -user $user -password $password 
 
