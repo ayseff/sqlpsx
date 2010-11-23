@@ -5,7 +5,7 @@ param($lhs,$rhs,$description)
 if ($lhs -eq $rhs){ 
 	Write-Host "$description PASSED" -BackgroundColor Green 
 } else {
-	Write-Host clsccc"$description FAILED" -BackgroundColor Red
+	Write-Host "$description FAILED" -BackgroundColor Red
 }
 }
 
@@ -70,5 +70,12 @@ $rows=invoke-query -sql $sql -server $server -database $db -user test_login -pas
 AssertEquals ($rows -is [Data.DataTable]) $true  "ad hoc connection with SQL Login as DataTable" 
 
 #test simple query using ad hoc connection and SQL Login with "-AsResult DataSet"
-$rows=invoke-query -sql $sql -server $server -database $db -user test_login -password 12345 -AsResult DataTable
+$rows=invoke-query -sql $sql -server $server -database $db -user test_login -password 12345 -AsResult DataSet
 AssertEquals ($rows -is [Data.DataSet]) $true  "ad hoc connection with SQL Login as DataSet" 
+
+
+#test simple query using ad hoc connection and SQL Login with "-AsResult DataRow"
+$rows=@(invoke-query -sql $sql -server $server -database $db -user test_login -password 12345 -AsResult DataRow)
+AssertEquals ($rows[0] -is [Data.DataRow]) $true  "ad hoc connection with SQL Login as DataRow" 
+
+
