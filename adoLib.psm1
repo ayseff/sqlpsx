@@ -288,15 +288,15 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
       [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
 	  [Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{})
    
-    $conn=get-connection -conn $conn -server $server -database $database -user $user -password $password
-    $close=($conn.State -eq [System.Data.ConnectionState]'Closed')
+    $dbconn=get-connection -conn $connection -server $server -database $database -user $user -password $password
+    $close=($dbconn.State -eq [System.Data.ConnectionState]'Closed')
     if ($close) {
-        $conn.Open()
+        $dbconn.Open()
     }	
-    $cmd=new-object system.Data.SqlClient.SqlCommand($sql,$conn)
+    $cmd=new-object system.Data.SqlClient.SqlCommand($sql,$dbconn)
     $cmd.CommandTimeout=$timeout
     foreach($p in $parameters.Keys){
-	$parm=$cmd.Parameters.AddWithValue("@$p",$parameters[$p])
+	    $parm=$cmd.Parameters.AddWithValue("@$p",$parameters[$p])
         if (is-null $parameters[$p]){
            $parm.Value=[DBNull]::Value
         }
