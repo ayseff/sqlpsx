@@ -26,18 +26,18 @@
 	
 
 	.EXAMPLE
-		PS C:\> is-null $row.columnname
+		PS C:\> Is-NULL $row.columnname
 
 	
     .INPUTS
         None.
-        You cannot pipe objects to New-connection
+        You cannot pipe objects to New-Connection
 
 	.OUTPUTS
 		Boolean
 
 #>
-function is-null{
+function Is-NULL{
   param([Parameter(Position=0, Mandatory=$true)]$value)
   return  [System.DBNull]::Value.Equals($value)
 }
@@ -63,20 +63,20 @@ function is-null{
 		The password for the user specified by the User parameter.
 
 	.EXAMPLE
-		PS C:\> new-connection -server MYSERVER -database master
+		PS C:\> New-Connection -server MYSERVER -database master
 
 	.EXAMPLE
 		PS C:\> Get-Something -server MYSERVER -user sa -password sapassword
 
     .INPUTS
         None.
-        You cannot pipe objects to New-connection
+        You cannot pipe objects to New-Connection
 
 	.OUTPUTS
 		System.Data.SqlClient.SQLConnection
 
 #>
-function new-connection{
+function New-Connection{
 param([Parameter(Position=0, Mandatory=$true)][string]$server, 
       [Parameter(Position=1, Mandatory=$false)][string]$database='',
       [string]$user='',
@@ -97,7 +97,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 	return $conn
 }
 
-function get-connection{
+function Get-Connection{
 param([System.Data.SqlClient.SQLConnection]$conn,
       [string]$server, 
       [string]$database,
@@ -105,7 +105,7 @@ param([System.Data.SqlClient.SQLConnection]$conn,
       [string]$password)
 	if (-not $conn){
 		if ($server){
-			$conn=new-connection -server $server -database $database -user $user -password $password 
+			$conn=New-Connection -server $server -database $database -user $user -password $password 
 		} else {
 		    throw "No connection or connection information supplied"
 		}
@@ -113,7 +113,7 @@ param([System.Data.SqlClient.SQLConnection]$conn,
 	return $conn
 }
 
-function put-outputparameters{
+function Put-OutputParameters{
 param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd, 
       [Parameter(Position=1, Mandatory=$false)][hashtable]$outparams)
     if ($outparams){
@@ -128,7 +128,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]
     }
 }
 
-function get-outputparameters{
+function Get-Outputparameters{
 param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]$cmd,
       [Parameter(Position=1, Mandatory=$true)][hashtable]$outparams)
 	foreach($p in $cmd.Parameters){
@@ -140,7 +140,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.SqlClient.SQLCommand]
 
 
 
-function get-paramtype{
+function Get-ParamType{
 param([string]$typename)
 	$type=switch -wildcard ($typename.ToLower()) {
 		'uniqueidentifier' {[System.Data.SqlDbType]::UniqueIdentifier}
@@ -162,7 +162,7 @@ param([string]$typename)
 	
 }
 
-function copy-hashtable{
+function Copy-HashTable{
 param([hashtable]$hash,
 [String[]]$include,
 [String[]]$exclude)
@@ -199,7 +199,7 @@ Options are:
 	
 
 #>
-function get-commandresults{
+function Get-CommandResults{
 param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds, 
       [Parameter(Position=1, Mandatory=$true)][HashTable]$outparams)   
 
@@ -276,7 +276,7 @@ param([Parameter(Position=0, Mandatory=$true)][System.Data.Dataset]$ds,
 		System.Data.SqlClient.SqlCommand
 
 #>
-function new-sqlcommand{
+function New-SQLCommand{
 param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$sql,
       [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
@@ -288,7 +288,7 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
       [Parameter(Position=8, Mandatory=$false)][System.Data.SqlClient.SqlTransaction]$transaction=$null,
 	  [Parameter(Position=9, Mandatory=$false)][hashtable]$outparameters=@{})
    
-    $dbconn=get-connection -conn $connection -server $server -database $database -user $user -password $password
+    $dbconn=Get-Connection -conn $connection -server $server -database $database -user $user -password $password
     $close=($dbconn.State -eq [System.Data.ConnectionState]'Closed')
     if ($close) {
         $dbconn.Open()
@@ -297,7 +297,7 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
     $cmd.CommandTimeout=$timeout
     foreach($p in $parameters.Keys){
 	    $parm=$cmd.Parameters.AddWithValue("@$p",$parameters[$p])
-        if (is-null $parameters[$p]){
+        if (Is-NULL $parameters[$p]){
            $parm.Value=[DBNull]::Value
         }
     }
@@ -353,7 +353,7 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
 
 
 	.EXAMPLE
-		PS C:\> $con=new-connection MyServer
+		PS C:\> $con=New-Connection MyServer
         PS C:\> invoke-sql "Update Table1 set Col1=null where TableID=@ID" -parameters @{ID=5}
 
     .INPUTS
@@ -364,7 +364,7 @@ param([Parameter(Position=0, Mandatory=$true)][Alias('storedProcName')][string]$
 		Integer
 
 #>
-function invoke-sql{
+function Invoke-Sql{
 param([Parameter(Position=0, Mandatory=$true)][string]$sql,
       [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SQLConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
@@ -426,12 +426,12 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
 		A transaction to execute the sql statement in.
     .EXAMPLE
         This is an example of a query that returns a single result.  
-        PS C:\> $c=new-connection '.\sqlexpress'
+        PS C:\> $c=New-Connection '.\sqlexpress'
         PS C:\> $res=invoke-query 'select * from master.dbo.sysdatabases' -conn $c
         PS C:\> $res 
    .EXAMPLE
         This is an example of a query that returns 2 distinct result sets.  
-        PS C:\> $c=new-connection '.\sqlexpress'
+        PS C:\> $c=New-Connection '.\sqlexpress'
         PS C:\> $res=invoke-query 'select * from master.dbo.sysdatabases; select * from master.dbo.sysservers' -conn $c
         PS C:\> $res.Tables[1]
     .EXAMPLE
@@ -448,7 +448,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
         2.  A dataset (for multi-result set queries)
         3.  An object that contains a dictionary of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
-function invoke-query{
+function Invoke-Query{
 param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
        [Parameter(ParameterSetName="SuppliedConnection", Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
        [Parameter(Position=2, Mandatory=$false)][hashtable]$parameters=@{},
@@ -525,11 +525,11 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
 		A transaction to execute the sql statement in.
     .EXAMPLE
         #Calling a simple stored procedure with no parameters
-        PS C:\> $c=new-connection -server '.\sqlexpress' 
+        PS C:\> $c=New-Connection -server '.\sqlexpress' 
         PS C:\> invoke-storedprocedure 'sp_who2' -conn $c
     .EXAMPLE 
         #Calling a stored procedure that has an output parameter and multiple result sets
-        PS C:\> $c=new-connection '.\sqlexpress'
+        PS C:\> $c=New-Connection '.\sqlexpress'
         PS C:\> $res=invoke-storedprocedure -storedProcName 'AdventureWorks2008.dbo.stp_test' -outparameters @{LogID='int'} -conne $c
         PS C:\> $res.Results.Tables[1]
         PS C:\> $res.OutputParameters
@@ -554,7 +554,7 @@ param( [Parameter(Position=0, Mandatory=$true)][string]$sql,
         2.  A dataset (for multi-result set queries)
         3.  An object that contains a hashtables of ouptut parameters and their values and either 1 or 2 (for queries that contain output parameters)
 #>
-function invoke-storedprocedure{
+function Invoke-StoredProcedure{
 param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
       [Parameter(ParameterSetName="SuppliedConnection",Position=1, Mandatory=$false)][System.Data.SqlClient.SqlConnection]$connection,
       [Parameter(Position=2, Mandatory=$false)][hashtable] $parameters=@{},
@@ -594,7 +594,9 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
 
 	.PARAMETER  records
 		Either a datatable (like one returned from invoke-query or invoke-storedprocedure) or
-        A sql command object (use new-sqlcommand)
+        A command object (e.g. new-sqlcommand), or a datareader object.  Note that the command object or datareader object 
+        can come from any class that inherits from System.Data.Common.DbCommand or System.Data.Common.DataReader, so this will work
+        with most ADO.NET client libraries (not just SQL Server).
 
 	.PARAMETER  Server
 		The destination server to connect to.  
@@ -650,7 +652,7 @@ param([Parameter(Position=0, Mandatory=$true)][string]$storedProcName,
 		System.Data.SqlClient.SqlCommand
 
 #>
-function invoke-bulkcopy{
+function Invoke-Bulkcopy{
   param([Parameter(Position=0, Mandatory=$true)]$records,
         [Parameter(Position=1, Mandatory=$true)]$server,
         [Parameter(Position=2, Mandatory=$false)]$database,
@@ -664,8 +666,8 @@ function invoke-bulkcopy{
         [Parameter(Position=10, Mandatory=$false)][scriptblock]$notifyFunction={Write-Host "$($args[1].RowsCopied) rows copied."},
         [Parameter(Position=11, Mandatory=$false)][System.Data.SqlClient.SqlBulkCopyOptions]$options=[System.Data.SqlClient.SqlBulkCopyOptions]::Default)
 
-	#use existing "new-connection" function to create a connection string.        
-        $connection=new-connection -server $server -database $Database -User $user -password $password
+	#use existing "New-Connection" function to create a connection string.        
+    $connection=New-Connection -server $server -database $Database -User $user -password $password
 	$connectionString = $connection.ConnectionString
 	$connection.close()
 
@@ -689,9 +691,12 @@ function invoke-bulkcopy{
 	}
 	
 	write-debug "Bulk copy starting at $(get-date)"
-	if ($records -is [System.Data.SqlClient.SqlCommand]){
+	if ($records -is [System.Data.Common.DBCommand]){
 		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
 		$bulkCopy.WriteToServer($records.ExecuteReader())
+    } elsif ($records -is [System.Data.Common.DbDataReader]){
+		#if passed a Datareader object use it to stream the records
+		$bulkCopy.WriteToServer($records)
 	} else {
 		$bulkCopy.WriteToServer($records)
 	}
@@ -700,7 +705,7 @@ function invoke-bulkcopy{
 
 
 
-export-modulemember new-connection
+export-modulemember New-Connection
 export-modulemember new-sqlcommand
 export-modulemember invoke-sql
 export-modulemember invoke-query
