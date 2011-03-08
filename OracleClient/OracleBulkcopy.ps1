@@ -109,9 +109,12 @@ function Invoke-OracleBulkcopy{
 	}
 	
 	write-debug "Bulk copy starting at $(get-date)"
-	#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
-    if ($records -is [System.Data.SqlClient.SqlCommand] -or $records -is [Oracle.DataAccess.Client.OracleCommand] ){
+	if ($records -is [System.Data.Common.DBCommand]){
+		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
 		$bulkCopy.WriteToServer($records.ExecuteReader())
+    } elsif ($records -is [System.Data.Common.DbDataReader]){
+		#if passed a Datareader object use it to stream the records
+		$bulkCopy.WriteToServer($records)
 	} else {
 		$bulkCopy.WriteToServer($records)
 	}
