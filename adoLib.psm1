@@ -66,7 +66,7 @@ function Is-NULL{
 		PS C:\> New-Connection -server MYSERVER -database master
 
 	.EXAMPLE
-		PS C:\> Get-Something -server MYSERVER -user sa -password sapassword
+		PS C:\> New-Connection -server MYSERVER -user sa -password sapassword
 
     .INPUTS
         None.
@@ -379,12 +379,14 @@ param([Parameter(Position=0, Mandatory=$true)][string]$sql,
 
        $cmd=new-sqlcommand @PSBoundParameters
 
+       $result=$cmd.ExecuteNonQuery()
+       
        #if it was an ad hoc connection, close it
        if ($server){
           $cmd.connection.close()
        }	
 
-       return $cmd.ExecuteNonQuery()
+       return $result
 	
 }
 <#
