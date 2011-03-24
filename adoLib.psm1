@@ -41,8 +41,55 @@ function Is-NULL{
   param([Parameter(Position=0, Mandatory=$true)]$value)
   return  [System.DBNull]::Value.Equals($value)
 }
+<#
+	.SYNOPSIS
+		Create a SQL Server connection string using the given parameters
 
+	.DESCRIPTION
+		This function creates a SQL Server connection string, using the parameters provided.  You may optionally provide the initial database, and SQL credentials (to use instead of NT Authentication).
 
+	.PARAMETER  Server
+		The name of the SQL Server to connect to.  To connect to a named instance, enclose the server name in quotes (e.g. "Laptop\SQLExpress")
+
+	.PARAMETER  Database
+		The InitialDatabase for the connection.
+	
+    .PARAMETER  User
+		The SQLUser you wish to use for the connection (instead of using NT Authentication)
+        
+	.PARAMETER  Password
+		The password for the user specified by the User parameter.
+
+	.EXAMPLE
+		PS C:\> New-ConnectionString -server MYSERVER -database master
+
+	.EXAMPLE
+		PS C:\> New-Connectionstring -server MYSERVER -user sa -password sapassword
+
+    .INPUTS
+        None.
+        You cannot pipe objects to New-Connectionstring
+
+	.OUTPUTS
+		String
+
+#>
+function New-ConnectionString{
+param([Parameter(Position=0, Mandatory=$true)][string]$server, 
+      [Parameter(Position=1, Mandatory=$false)][string]$database='',
+      [string]$user='',
+      [string]$password='')
+	if($database -ne ''){
+	  $dbclause="Database=$database;"
+	}
+	
+	if ($user -ne ''){
+		$ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password;Pooling=false"
+	} else {
+		$ConnectionString="Server=$server;$dbclause`Integrated Security=True"
+	}
+    return $ConnectionString
+}
 <#
 	.SYNOPSIS
 		Create a SQLConnection object with the given parameters
@@ -86,13 +133,10 @@ param([Parameter(Position=0, Mandatory=$true)][string]$server,
 	  $dbclause="Database=$database;"
 	}
 	$conn=new-object System.Data.SqlClient.SQLConnection
-	
-	if ($user -ne ''){
-		$conn.ConnectionString="Server=$server;$dbclause`User ID=$user;Password=$password;Pooling=false"
-	} else {
-		$conn.ConnectionString="Server=$server;$dbclause`Integrated Security=True"
-	}
+	$conn.ConnectionString=new-connectionstring @PSBoundParameters
+    
 	$conn.Open()
+    
     write-debug $conn.ConnectionString
 	return $conn
 }
@@ -669,9 +713,9 @@ function Invoke-Bulkcopy{
         [Parameter(Position=11, Mandatory=$false)][System.Data.SqlClient.SqlBulkCopyOptions]$options=[System.Data.SqlClient.SqlBulkCopyOptions]::Default)
 
 	#use existing "New-Connection" function to create a connection string.        
-    $connection=New-Connection -server $server -database $Database -User $user -password $password
-	$connectionString = $connection.ConnectionString
-	$connection.close()
+
+	$connectionString =New-ConnectionString -server $server -database $Database -User $user -password $password
+
 
 	#Use a transaction if one was specified
 	if ($transaction -is [System.Data.SqlClient.SqlTransaction]){
@@ -696,7 +740,7 @@ function Invoke-Bulkcopy{
 	if ($records -is [System.Data.Common.DBCommand]){
 		#if passed a command object (rather than a datatable), ask it for a datareader to stream the records
 		$bulkCopy.WriteToServer($records.ExecuteReader())
-    } elsif ($records -is [System.Data.Common.DbDataReader]){
+    } elseif ($records -is [System.Data.Common.DbDataReader]){
 		#if passed a Datareader object use it to stream the records
 		$bulkCopy.WriteToServer($records)
 	} else {
