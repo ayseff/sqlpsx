@@ -18,6 +18,6 @@ import-module adonetlib -args MySql.Data.MySqlClient -Prefix MySQL -force
 
 # .NET (and PowerShell) do not like zero datetime values by default.  This option helps with that.
 # http://dev.mysql.com/doc/refman/5.5/en/connector-net-connection-options.html
-Set-MySQLADONetParameters -option @{'Allow Zero Datetime'='true'}
+Set-MySQLADONetParameters -option @{'Allow Zero Datetime'='true'} -ParameterPrefix ''
 
 Export-ModuleMember *-MySQL*
