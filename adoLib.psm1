@@ -4,7 +4,7 @@
 ### Mike Shepard
 ### </Author>
 ### <Description>
-### Defines functions for executing Ado.net queries
+### Defines functions for executing Ado.net queries with the SQLClient provider
 ### </Description>
 ### <Usage>
 ### import-module adolib
@@ -22,7 +22,7 @@ import-module adonetlib -args System.Data.SqlClient -Prefix SQL -force
 
 	.DESCRIPTION
         
-		Also, the invoke-bulkcopy function allows you to pass a command object instead of a set of records in order to "stream" the records
+		Also, the invoke-SQLBulkcopy function allows you to pass a command object instead of a set of records in order to "stream" the records
         into the destination in cases where there are a lot of records and you don't want to allocate memory to hold the entire result set.
 
 	.PARAMETER  records
@@ -134,6 +134,7 @@ function Invoke-SQLBulkcopy{
 	}
 	write-debug "Bulk copy finished at $(get-date)"
 }
+
 
 #define aliases for backwards compatibility 
 New-Alias new-Connection new-sqlconnection
