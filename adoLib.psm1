@@ -137,13 +137,13 @@ function Invoke-SQLBulkcopy{
 
 
 #define aliases for backwards compatibility 
-New-Alias new-Connection new-sqlconnection
-New-Alias new-Command New-SQLCommand
-New-Alias invoke-query invoke-sqlquery
-New-Alias invoke-Command invoke-sqlcommand
-New-Alias invoke-StoredProcedure invoke-sqlstoredprocedure
+#New-Alias new-Connection new-sqlconnection
+#New-Alias new-Command New-SQLCommand
+#New-Alias invoke-query invoke-sqlquery
+#New-Alias invoke-Command invoke-sqlcommand
+#New-Alias invoke-StoredProcedure invoke-sqlstoredprocedure
 
 
-export-modulemember new-connection
+#export-modulemember new-connection
 export-modulemember *-sql*
-Export-ModuleMember -Alias *
+#Export-ModuleMember -Alias *
